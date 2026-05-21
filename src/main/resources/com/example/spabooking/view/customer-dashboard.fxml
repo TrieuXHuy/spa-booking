@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane styleClass="app-shell"
+            xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.spabooking.controller.AdminDashboardController">
+    <left>
+        <fx:include fx:id="sidebar" source="sidebar.fxml"/>
+    </left>
+    <center>
+        <VBox spacing="20" styleClass="main-panel">
+            <padding>
+                <Insets top="24" right="28" bottom="28" left="28"/>
+            </padding>
+            <children>
+                <HBox alignment="CENTER_LEFT" minHeight="72" prefHeight="72" maxHeight="72" spacing="18" styleClass="topbar">
+                    <children>
+                        <VBox spacing="4">
+                            <children>
+                                <Label fx:id="headerTitle" text="Dashboard" styleClass="page-title"/>
+                                <Label fx:id="headerSubtitle" text="Khu vực đặt lịch của khách hàng" styleClass="page-subtitle"/>
+                            </children>
+                        </VBox>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <VBox alignment="CENTER_RIGHT" spacing="4" styleClass="user-chip">
+                            <children>
+                                <Label fx:id="userNameLabel" text="Customer" styleClass="user-name"/>
+                                <Label fx:id="userRoleLabel" text="CUSTOMER" styleClass="user-role"/>
+                            </children>
+                        </VBox>
+                    </children>
+                </HBox>
+
+                <StackPane fx:id="contentArea" styleClass="content-area" VBox.vgrow="ALWAYS"/>
+            </children>
+        </VBox>
+    </center>
+</BorderPane>

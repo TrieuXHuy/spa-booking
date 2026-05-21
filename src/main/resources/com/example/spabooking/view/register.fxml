@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<HBox styleClass="login-page"
+      xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.spabooking.controller.RegisterController">
+    <children>
+        <VBox alignment="CENTER_LEFT" minWidth="500" spacing="30" styleClass="login-brand-panel" HBox.hgrow="ALWAYS">
+            <padding>
+                <Insets top="52" right="56" bottom="52" left="64"/>
+            </padding>
+            <children>
+                <VBox spacing="12">
+                    <children>
+                        <HBox alignment="CENTER_LEFT" spacing="14">
+                            <children>
+                                <StackPane styleClass="brand-mark-large">
+                                    <children>
+                                        <Label text="S" styleClass="brand-mark-text"/>
+                                    </children>
+                                </StackPane>
+                                <VBox spacing="3">
+                                    <children>
+                                        <Label text="Spa Booking" styleClass="brand-title-large"/>
+                                        <Label text="Customer Registration" styleClass="brand-subtitle"/>
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+                        <Label text="Tạo tài khoản khách hàng" styleClass="welcome-title" wrapText="true"/>
+                        <Label text="Tài khoản đăng ký tại đây được dùng cho vai trò CUSTOMER để xem dịch vụ, đặt lịch và theo dõi lịch sử thanh toán." styleClass="welcome-copy" wrapText="true"/>
+                    </children>
+                </VBox>
+
+                <StackPane styleClass="spa-visual-card" VBox.vgrow="ALWAYS">
+                    <children>
+                        <VBox alignment="CENTER_LEFT" spacing="18" styleClass="spa-visual-content">
+                            <children>
+                                <Label text="CUSTOMER ACCOUNT" styleClass="visual-kicker"/>
+                                <Label text="Đặt lịch nhanh hơn với hồ sơ cá nhân, số điện thoại và email được lưu sẵn." styleClass="visual-caption" wrapText="true"/>
+                                <Region VBox.vgrow="ALWAYS"/>
+                                <HBox spacing="16">
+                                    <children>
+                                        <VBox spacing="7" styleClass="visual-stat">
+                                            <children>
+                                                <Label text="01" styleClass="visual-stat-value"/>
+                                                <Label text="Chọn dịch vụ" styleClass="visual-stat-label"/>
+                                            </children>
+                                        </VBox>
+                                        <VBox spacing="7" styleClass="visual-stat">
+                                            <children>
+                                                <Label text="02" styleClass="visual-stat-value"/>
+                                                <Label text="Đặt lịch" styleClass="visual-stat-label"/>
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+                    </children>
+                </StackPane>
+            </children>
+        </VBox>
+
+        <StackPane minWidth="560" prefWidth="620" maxWidth="660" styleClass="login-form-panel">
+            <children>
+                <VBox fx:id="registerCard" alignment="CENTER_LEFT" prefWidth="540" maxWidth="580" spacing="18" styleClass="login-card">
+                    <padding>
+                        <Insets top="32" right="36" bottom="32" left="36"/>
+                    </padding>
+                    <children>
+                        <VBox spacing="8">
+                            <children>
+                                <Label text="Đăng ký tài khoản" styleClass="login-title"/>
+                                <Label text="Nhập thông tin để tạo tài khoản khách hàng." styleClass="login-copy" wrapText="true"/>
+                            </children>
+                        </VBox>
+
+                        <Separator/>
+
+                        <GridPane hgap="14" vgap="12">
+                            <children>
+                                <VBox spacing="7" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                                    <children>
+                                        <Label text="Họ và tên" styleClass="field-label"/>
+                                        <TextField fx:id="fullNameField" promptText="Nguyễn Văn A" styleClass="input-field"/>
+                                    </children>
+                                </VBox>
+                                <VBox spacing="7" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                                    <children>
+                                        <Label text="Tên đăng nhập" styleClass="field-label"/>
+                                        <TextField fx:id="usernameField" promptText="customer01" styleClass="input-field"/>
+                                    </children>
+                                </VBox>
+                                <VBox spacing="7" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                                    <children>
+                                        <Label text="Mật khẩu" styleClass="field-label"/>
+                                        <PasswordField fx:id="passwordField" promptText="Nhập mật khẩu" styleClass="input-field"/>
+                                    </children>
+                                </VBox>
+                                <VBox spacing="7" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                    <children>
+                                        <Label text="Xác nhận mật khẩu" styleClass="field-label"/>
+                                        <PasswordField fx:id="confirmPasswordField" promptText="Nhập lại mật khẩu" styleClass="input-field"/>
+                                    </children>
+                                </VBox>
+                                <VBox spacing="7" GridPane.columnIndex="0" GridPane.rowIndex="2">
+                                    <children>
+                                        <Label text="Email" styleClass="field-label"/>
+                                        <TextField fx:id="emailField" promptText="email@example.com" styleClass="input-field"/>
+                                    </children>
+                                </VBox>
+                                <VBox spacing="7" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                                    <children>
+                                        <Label text="Số điện thoại" styleClass="field-label"/>
+                                        <TextField fx:id="phoneField" promptText="0900000000" styleClass="input-field"/>
+                                    </children>
+                                </VBox>
+                                <VBox spacing="7" GridPane.columnIndex="0" GridPane.rowIndex="3">
+                                    <children>
+                                        <Label text="Giới tính" styleClass="field-label"/>
+                                        <ComboBox fx:id="genderComboBox" maxWidth="Infinity" styleClass="input-combo"/>
+                                    </children>
+                                </VBox>
+                            </children>
+                        </GridPane>
+
+                        <Label fx:id="errorLabel" styleClass="error-label" wrapText="true"/>
+
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+                            <children>
+                                <Button fx:id="registerButton" defaultButton="true" maxWidth="Infinity" onAction="#handleRegister" text="Đăng ký" styleClass="primary-button" HBox.hgrow="ALWAYS"/>
+                                <Button fx:id="backButton" mnemonicParsing="false" onAction="#handleBackToLogin" text="Quay lại đăng nhập" styleClass="secondary-button"/>
+                                <ProgressIndicator fx:id="loadingIndicator" prefWidth="24" prefHeight="24"/>
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+            </children>
+        </StackPane>
+    </children>
+</HBox>

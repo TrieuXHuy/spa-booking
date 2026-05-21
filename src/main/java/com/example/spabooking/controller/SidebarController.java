@@ -74,7 +74,9 @@ public class SidebarController {
     }
 
     public void setRole(String roleName) {
-        roleBadge.setText(roleName == null || roleName.isBlank() ? "USER" : roleName.toUpperCase());
+        String role = roleName == null || roleName.isBlank() ? "USER" : roleName.toUpperCase();
+        roleBadge.setText(role);
+        applyRoleMenu(role);
     }
 
     @FXML
@@ -137,5 +139,36 @@ public class SidebarController {
             button.getStyleClass().remove("active");
         }
         active.getStyleClass().add("active");
+    }
+
+    private void applyRoleMenu(String role) {
+        navButtons.forEach(button -> setButtonVisible(button, true));
+        switch (role) {
+            case "ADMIN" -> {
+            }
+            case "EMPLOYEE" -> {
+                setButtonVisible(usersButton, false);
+                setButtonVisible(employeesButton, false);
+                setButtonVisible(invoicesButton, false);
+                setButtonVisible(smsButton, false);
+                setButtonVisible(reportsButton, false);
+            }
+            case "CUSTOMER" -> {
+                setButtonVisible(usersButton, false);
+                setButtonVisible(customersButton, false);
+                setButtonVisible(employeesButton, false);
+                setButtonVisible(smsButton, false);
+                setButtonVisible(reportsButton, false);
+            }
+            default -> navButtons.stream()
+                    .filter(button -> button != dashboardButton)
+                    .forEach(button -> setButtonVisible(button, false));
+        }
+        select(dashboardButton);
+    }
+
+    private void setButtonVisible(Button button, boolean visible) {
+        button.setVisible(visible);
+        button.setManaged(visible);
     }
 }

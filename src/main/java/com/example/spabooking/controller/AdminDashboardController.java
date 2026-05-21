@@ -2,9 +2,12 @@ package com.example.spabooking.controller;
 
 import com.example.spabooking.MainApp;
 import com.example.spabooking.model.UserSession;
+import com.example.spabooking.session.SessionManager;
 import java.io.IOException;
+import java.util.Optional;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -115,6 +118,16 @@ public class AdminDashboardController {
     }
 
     private void handleLogout() {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Đăng xuất");
+        confirm.setHeaderText(null);
+        confirm.setContentText("Bạn có chắc chắn muốn đăng xuất không?");
+        Optional<ButtonType> result = confirm.showAndWait();
+        if (result.isEmpty() || result.get() != ButtonType.OK) {
+            return;
+        }
+
+        SessionManager.clear();
         try {
             mainApp.showLogin();
         } catch (IOException e) {

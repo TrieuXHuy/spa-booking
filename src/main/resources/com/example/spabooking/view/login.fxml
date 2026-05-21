@@ -124,6 +124,12 @@
                         </HBox>
 
                         <Region minHeight="8"/>
+                        <HBox alignment="CENTER" spacing="6">
+                            <children>
+                                <Label text="Chưa có tài khoản?" styleClass="helper-label"/>
+                                <Button fx:id="registerButton" mnemonicParsing="false" onAction="#handleOpenRegister" text="Đăng ký" styleClass="link-button"/>
+                            </children>
+                        </HBox>
                         <Label text="API mặc định: http://localhost:8080" styleClass="helper-label"/>
                     </children>
                 </VBox>

@@ -1,9 +1,9 @@
 package com.example.spabooking.controller;
 
 import com.example.spabooking.MainApp;
-import com.example.spabooking.client.ApiClient;
-import com.example.spabooking.model.UserSession;
-import java.io.IOException;
+import com.example.spabooking.client.AuthClient;
+import com.example.spabooking.client.dto.LoginResponse;
+import com.example.spabooking.session.SessionManager;
 import java.util.concurrent.CompletionException;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -31,12 +31,15 @@ public class LoginController {
     private Button loginButton;
 
     @FXML
+    private Button registerButton;
+
+    @FXML
     private ProgressIndicator loadingIndicator;
 
     @FXML
     private Label errorLabel;
 
-    private final ApiClient apiClient = new ApiClient();
+    private final AuthClient authClient = new AuthClient();
     private MainApp mainApp;
 
     public void setMainApp(MainApp mainApp) {
@@ -49,6 +52,8 @@ public class LoginController {
         loadingIndicator.setManaged(false);
         errorLabel.setVisible(false);
         errorLabel.setManaged(false);
+        usernameField.clear();
+        passwordField.clear();
 
         loginCard.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ENTER) {
@@ -75,7 +80,7 @@ public class LoginController {
         }
 
         setLoading(true);
-        apiClient.post("/api/auth/login", new LoginRequest(username, password), LoginResponse.class)
+        authClient.login(username, password)
                 .thenAccept(response -> Platform.runLater(() -> openDashboard(response)))
                 .exceptionally(error -> {
                     Platform.runLater(() -> {
@@ -86,27 +91,32 @@ public class LoginController {
                 });
     }
 
+    @FXML
+    private void handleOpenRegister() {
+        clearError();
+        try {
+            mainApp.showRegister();
+        } catch (Exception e) {
+            showAlert("Lỗi giao diện", "Không thể mở màn hình đăng ký.");
+        }
+    }
+
     private void openDashboard(LoginResponse response) {
         setLoading(false);
         if (response == null || response.user() == null) {
-            showInlineError("Thông tin đăng nhập không hợp lệ.");
+            showInlineError(AuthClient.INVALID_LOGIN_MESSAGE);
             return;
         }
-        UserResponse user = response.user();
-        String roleName = user.role() == null ? "" : user.role().name();
-        UserSession session = new UserSession(
-                user.id(),
-                user.username(),
-                user.fullName(),
-                user.email(),
-                user.phone(),
-                roleName
-        );
 
         try {
-            mainApp.showAdminDashboard(session);
-        } catch (IOException e) {
-            showAlert("Lỗi giao diện", "Không thể mở dashboard.");
+            SessionManager.login(response);
+            mainApp.showDashboardByRole();
+        } catch (IllegalArgumentException e) {
+            SessionManager.clear();
+            showInlineError(e.getMessage());
+        } catch (Exception e) {
+            SessionManager.clear();
+            showInlineError("Không thể mở dashboard.");
         }
     }
 
@@ -138,7 +148,7 @@ public class LoginController {
             current = current.getCause();
         }
         return current.getMessage() == null || current.getMessage().isBlank()
-                ? "Đăng nhập thất bại. Vui lòng thử lại."
+                ? AuthClient.INVALID_LOGIN_MESSAGE
                 : current.getMessage();
     }
 
@@ -148,25 +158,5 @@ public class LoginController {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
-    }
-
-    private record LoginRequest(String username, String password) {
-    }
-
-    private record LoginResponse(String message, UserResponse user) {
-    }
-
-    private record UserResponse(
-            Long id,
-            String username,
-            String fullName,
-            String email,
-            String phone,
-            Boolean active,
-            RoleResponse role
-    ) {
-    }
-
-    private record RoleResponse(Long id, String name, String description) {
     }
 }

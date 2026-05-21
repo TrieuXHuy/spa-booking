@@ -2,7 +2,9 @@ package com.example.spabooking;
 
 import com.example.spabooking.controller.AdminDashboardController;
 import com.example.spabooking.controller.LoginController;
+import com.example.spabooking.controller.RegisterController;
 import com.example.spabooking.model.UserSession;
+import com.example.spabooking.session.SessionManager;
 import java.io.IOException;
 import java.net.URL;
 import javafx.application.Application;
@@ -49,8 +51,41 @@ public class MainApp extends Application {
         primaryStage.show();
     }
 
+    public void showRegister() throws IOException {
+        FXMLLoader loader = loadView("register.fxml");
+        Parent root = loader.load();
+        RegisterController controller = loader.getController();
+        controller.setMainApp(this);
+
+        Scene scene = new Scene(root, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+        applyTheme(scene);
+        primaryStage.setScene(scene);
+        primaryStage.centerOnScreen();
+        primaryStage.show();
+    }
+
     public void showAdminDashboard(UserSession session) throws IOException {
-        FXMLLoader loader = loadView("admin-dashboard.fxml");
+        showDashboard("admin-dashboard.fxml", session);
+    }
+
+    public void showDashboardByRole() throws IOException {
+        if (!SessionManager.isLoggedIn()) {
+            showLogin();
+            return;
+        }
+
+        UserSession session = SessionManager.toUserSession();
+        String role = session.roleName() == null ? "" : session.roleName().trim().toUpperCase();
+        switch (role) {
+            case "ADMIN" -> showDashboard("admin-dashboard.fxml", session);
+            case "EMPLOYEE" -> showDashboard("employee-dashboard.fxml", session);
+            case "CUSTOMER" -> showDashboard("customer-dashboard.fxml", session);
+            default -> throw new IllegalArgumentException("Vai trò người dùng không hợp lệ");
+        }
+    }
+
+    private void showDashboard(String viewName, UserSession session) throws IOException {
+        FXMLLoader loader = loadView(viewName);
         Parent root = loader.load();
         AdminDashboardController controller = loader.getController();
         controller.setMainApp(this);
