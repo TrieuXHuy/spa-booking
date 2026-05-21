@@ -69,7 +69,7 @@ public class LoginController {
         String password = passwordField.getText() == null ? "" : passwordField.getText();
 
         if (username.isBlank()) {
-            showInlineError("Vui lòng nhập email hoặc số điện thoại.");
+            showInlineError("Vui lòng nhập tên đăng nhập.");
             usernameField.requestFocus();
             return;
         }

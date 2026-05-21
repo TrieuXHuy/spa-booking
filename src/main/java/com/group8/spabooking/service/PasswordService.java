@@ -3,10 +3,13 @@ package com.group8.spabooking.service;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class PasswordService {
+
+    private static final BCryptPasswordEncoder BCRYPT = new BCryptPasswordEncoder();
 
     public String encode(String rawPassword) {
         try {
@@ -23,6 +26,20 @@ public class PasswordService {
     }
 
     public boolean matches(String rawPassword, String encodedPassword) {
-        return encode(rawPassword).equals(encodedPassword);
+        if (rawPassword == null || encodedPassword == null) {
+            return false;
+        }
+        return matchesBcrypt(rawPassword, encodedPassword)
+                || encode(rawPassword).equals(encodedPassword)
+                || rawPassword.equals(encodedPassword);
+    }
+
+    private boolean matchesBcrypt(String rawPassword, String encodedPassword) {
+        if (!encodedPassword.startsWith("$2a$")
+                && !encodedPassword.startsWith("$2b$")
+                && !encodedPassword.startsWith("$2y$")) {
+            return false;
+        }
+        return BCRYPT.matches(rawPassword, encodedPassword);
     }
 }

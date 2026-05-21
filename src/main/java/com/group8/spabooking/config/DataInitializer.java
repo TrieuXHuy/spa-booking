@@ -37,24 +37,27 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void seedAdmin() {
-        if (userRepository.existsByUsername("admin")) {
-            return;
-        }
-
         Role adminRole = roleRepository.findByName("ADMIN")
                 .orElseThrow(() -> new IllegalStateException("ADMIN role is missing"));
         LocalDateTime now = LocalDateTime.now();
+        userRepository.findByUsername("admin").ifPresentOrElse(existingAdmin -> {
+            existingAdmin.setPassword(passwordService.encode("admin123"));
+            existingAdmin.setFullName("System Admin");
+            existingAdmin.setRole(adminRole);
+            existingAdmin.setActive(true);
+            existingAdmin.setUpdatedAt(now);
+        }, () -> {
+            User admin = User.builder()
+                    .username("admin")
+                    .password(passwordService.encode("admin123"))
+                    .fullName("System Admin")
+                    .role(adminRole)
+                    .active(true)
+                    .createdAt(now)
+                    .updatedAt(now)
+                    .build();
 
-        User admin = User.builder()
-                .username("admin")
-                .password(passwordService.encode("admin123"))
-                .fullName("System Admin")
-                .role(adminRole)
-                .active(true)
-                .createdAt(now)
-                .updatedAt(now)
-                .build();
-
-        userRepository.save(admin);
+            userRepository.save(admin);
+        });
     }
 }
