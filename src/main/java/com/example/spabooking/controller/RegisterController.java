@@ -7,6 +7,7 @@ import java.util.concurrent.CompletionException;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import com.example.spabooking.ui.DialogHelper;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -145,11 +146,10 @@ public class RegisterController {
 
     private void showSuccessAndBackToLogin() {
         setLoading(false);
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Đăng ký thành công");
-        alert.setHeaderText(null);
-        alert.setContentText("Đăng ký tài khoản thành công. Vui lòng đăng nhập.");
-        alert.showAndWait();
+        DialogHelper.createAlert(Alert.AlertType.INFORMATION,
+            "Đăng ký thành công",
+            "Đăng ký tài khoản thành công. Vui lòng đăng nhập.")
+            .showAndWait();
         openLogin();
     }
 

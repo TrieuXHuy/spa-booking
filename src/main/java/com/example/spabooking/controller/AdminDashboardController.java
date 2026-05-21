@@ -48,6 +48,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import com.example.spabooking.ui.DialogHelper;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -877,10 +878,9 @@ public class AdminDashboardController {
             showInlineError("Chưa chọn dữ liệu", "Vui lòng chọn một " + label + " trong bảng.");
             return;
         }
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Xóa " + label);
-        confirm.setHeaderText(null);
-        confirm.setContentText("Bạn có chắc chắn muốn xóa " + label + " này không?");
+        Alert confirm = DialogHelper.createAlert(Alert.AlertType.CONFIRMATION,
+            "Xóa " + label,
+            "Bạn có chắc chắn muốn xóa " + label + " này không?");
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
             runMutation(deleteCall.apply(selected), refresh, "Không thể xóa " + label);
@@ -972,11 +972,7 @@ public class AdminDashboardController {
     }
 
     private void showInlineError(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+        DialogHelper.createAlert(Alert.AlertType.ERROR, title, message).showAndWait();
     }
 
     private void showDashboard() {
@@ -1026,10 +1022,9 @@ public class AdminDashboardController {
     }
 
     private void handleLogout() {
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Đăng xuất");
-        confirm.setHeaderText(null);
-        confirm.setContentText("Bạn có chắc chắn muốn đăng xuất không?");
+        Alert confirm = DialogHelper.createAlert(Alert.AlertType.CONFIRMATION,
+            "Đăng xuất",
+            "Bạn có chắc chắn muốn đăng xuất không?");
         Optional<ButtonType> result = confirm.showAndWait();
         if (result.isEmpty() || result.get() != ButtonType.OK) {
             return;
@@ -1111,6 +1106,7 @@ public class AdminDashboardController {
             dialog.setTitle(title);
             dialog.setHeaderText(null);
             dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+            DialogHelper.applyBaseDialogStyles(dialog);
             grid.setHgap(12);
             grid.setVgap(12);
             grid.setPadding(new Insets(18));

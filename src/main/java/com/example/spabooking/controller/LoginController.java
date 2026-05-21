@@ -7,6 +7,7 @@ import com.example.spabooking.session.SessionManager;
 import java.util.concurrent.CompletionException;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import com.example.spabooking.ui.DialogHelper;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -153,10 +154,6 @@ public class LoginController {
     }
 
     private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+        DialogHelper.createAlert(Alert.AlertType.ERROR, title, message).showAndWait();
     }
 }

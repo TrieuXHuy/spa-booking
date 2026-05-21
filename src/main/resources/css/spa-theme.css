@@ -442,3 +442,58 @@
     -fx-font-size: 12px;
     -fx-font-weight: 800;
 }
+
+.base-dialog {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 18;
+    -fx-padding: 18;
+    -fx-effect: dropshadow(gaussian, rgba(86, 60, 52, 0.12), 20, 0.1, 0, 8);
+}
+
+.base-dialog .content {
+    -fx-padding: 6 2 2 2;
+}
+
+.base-dialog .label {
+    -fx-text-fill: #3A3A3A;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+}
+
+.base-dialog .text-field,
+.base-dialog .password-field,
+.base-dialog .text-area,
+.base-dialog .combo-box-base {
+    -fx-background-color: #FFF7F3;
+    -fx-background-radius: 12;
+    -fx-border-color: transparent;
+    -fx-border-radius: 12;
+    -fx-padding: 10 12;
+    -fx-font-size: 13px;
+}
+
+.base-dialog .text-field:focused,
+.base-dialog .password-field:focused,
+.base-dialog .text-area:focused,
+.base-dialog .combo-box-base:focused {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #7BC6A4;
+    -fx-effect: dropshadow(gaussian, rgba(123, 198, 164, 0.2), 12, 0.1, 0, 4);
+}
+
+.base-dialog .button-bar .button {
+    -fx-background-radius: 12;
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-padding: 10 16;
+}
+
+.base-dialog .button-bar .button:default {
+    -fx-background-color: #7BC6A4;
+    -fx-text-fill: white;
+}
+
+.base-dialog .button-bar .button:cancel {
+    -fx-background-color: #FFF7F3;
+    -fx-text-fill: #3A3A3A;
+}
