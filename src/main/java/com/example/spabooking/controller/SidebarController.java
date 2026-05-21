@@ -27,6 +27,9 @@ public class SidebarController {
     private Button servicesButton;
 
     @FXML
+    private Button schedulesButton;
+
+    @FXML
     private Button appointmentsButton;
 
     @FXML
@@ -55,6 +58,7 @@ public class SidebarController {
                 customersButton,
                 employeesButton,
                 servicesButton,
+                schedulesButton,
                 appointmentsButton,
                 invoicesButton,
                 smsButton,
@@ -105,6 +109,11 @@ public class SidebarController {
     }
 
     @FXML
+    private void showSchedules() {
+        navigate("schedules", schedulesButton);
+    }
+
+    @FXML
     private void showAppointments() {
         navigate("appointments", appointmentsButton);
     }
@@ -149,6 +158,7 @@ public class SidebarController {
             case "EMPLOYEE" -> {
                 setButtonVisible(usersButton, false);
                 setButtonVisible(employeesButton, false);
+                setButtonVisible(schedulesButton, false);
                 setButtonVisible(invoicesButton, false);
                 setButtonVisible(smsButton, false);
                 setButtonVisible(reportsButton, false);
@@ -157,6 +167,7 @@ public class SidebarController {
                 setButtonVisible(usersButton, false);
                 setButtonVisible(customersButton, false);
                 setButtonVisible(employeesButton, false);
+                setButtonVisible(schedulesButton, false);
                 setButtonVisible(smsButton, false);
                 setButtonVisible(reportsButton, false);
             }

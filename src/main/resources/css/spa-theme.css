@@ -202,6 +202,20 @@
     -fx-background-color: #F7D9D9;
 }
 
+.danger-button {
+    -fx-background-color: #FDEDEC;
+    -fx-background-radius: 12;
+    -fx-text-fill: #C65D5D;
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+    -fx-padding: 13 18;
+    -fx-cursor: hand;
+}
+
+.danger-button:hover {
+    -fx-background-color: #F8D1D1;
+}
+
 .link-button {
     -fx-background-color: transparent;
     -fx-text-fill: #2F7D63;
@@ -381,4 +395,50 @@
 .table-row-cell:selected {
     -fx-background-color: #D8F3DC;
     -fx-text-fill: #3A3A3A;
+}
+
+.admin-panel {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 16;
+    -fx-padding: 18;
+    -fx-effect: dropshadow(gaussian, rgba(86, 60, 52, 0.08), 18, 0.08, 0, 7);
+}
+
+.admin-search-field {
+    -fx-background-color: #FFF7F3;
+    -fx-background-radius: 12;
+    -fx-border-color: transparent;
+    -fx-border-radius: 12;
+    -fx-padding: 11 14;
+    -fx-font-size: 13px;
+    -fx-min-height: 42;
+}
+
+.admin-search-field:focused {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #7BC6A4;
+}
+
+.admin-table {
+    -fx-background-color: #FFFFFF;
+    -fx-background-radius: 12;
+    -fx-border-color: #F1E1DD;
+    -fx-border-radius: 12;
+}
+
+.admin-table .column-header-background {
+    -fx-background-color: #FFF7F3;
+    -fx-background-radius: 12 12 0 0;
+}
+
+.admin-table .column-header,
+.admin-table .filler {
+    -fx-background-color: transparent;
+    -fx-size: 42;
+}
+
+.admin-table .column-header .label {
+    -fx-text-fill: #3A3A3A;
+    -fx-font-size: 12px;
+    -fx-font-weight: 800;
 }

@@ -1,6 +1,7 @@
 package com.example.spabooking.client;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -50,6 +51,10 @@ public class ApiClient {
         return send(buildRequest(path).GET().build(), responseType);
     }
 
+    public <T> CompletableFuture<T> get(String path, TypeReference<T> responseType) {
+        return send(buildRequest(path).GET().build(), responseType);
+    }
+
     public <T> CompletableFuture<T> get(String path, Map<String, ?> query, Class<T> responseType) {
         return get(path + toQueryString(query), responseType);
     }
@@ -60,6 +65,10 @@ public class ApiClient {
 
     public <T> CompletableFuture<T> put(String path, Object body, Class<T> responseType) {
         return send(buildJsonRequest(path, body).PUT(jsonBody(body)).build(), responseType);
+    }
+
+    public <T> CompletableFuture<T> patch(String path, Object body, Class<T> responseType) {
+        return send(buildJsonRequest(path, body).method("PATCH", jsonBody(body)).build(), responseType);
     }
 
     public CompletableFuture<Void> delete(String path) {
@@ -89,6 +98,21 @@ public class ApiClient {
                 });
     }
 
+    private <T> CompletableFuture<T> send(HttpRequest request, TypeReference<T> responseType) {
+        return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .thenApply(response -> parseResponse(response, responseType))
+                .exceptionally(error -> {
+                    Throwable cause = unwrap(error);
+                    if (cause instanceof ConnectException || cause instanceof IOException) {
+                        throw new ApiException(CONNECTION_ERROR, cause);
+                    }
+                    if (cause instanceof ApiException apiException) {
+                        throw apiException;
+                    }
+                    throw new ApiException("Có lỗi xảy ra khi gọi API.", cause);
+                });
+    }
+
     private <T> T parseResponse(HttpResponse<String> response, Class<T> responseType) {
         int statusCode = response.statusCode();
         String body = response.body();
@@ -96,6 +120,22 @@ public class ApiClient {
             throw new ApiException(extractErrorMessage(body, statusCode), statusCode, body);
         }
         if (responseType == Void.class || body == null || body.isBlank()) {
+            return null;
+        }
+        try {
+            return objectMapper.readValue(body, responseType);
+        } catch (JsonProcessingException e) {
+            throw new ApiException("Dữ liệu phản hồi từ server không hợp lệ.", e);
+        }
+    }
+
+    private <T> T parseResponse(HttpResponse<String> response, TypeReference<T> responseType) {
+        int statusCode = response.statusCode();
+        String body = response.body();
+        if (statusCode < 200 || statusCode >= 300) {
+            throw new ApiException(extractErrorMessage(body, statusCode), statusCode, body);
+        }
+        if (body == null || body.isBlank()) {
             return null;
         }
         try {

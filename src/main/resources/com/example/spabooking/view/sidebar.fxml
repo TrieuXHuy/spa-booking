@@ -29,6 +29,7 @@
                 <Button fx:id="customersButton" maxWidth="Infinity" mnemonicParsing="false" onAction="#showCustomers" text="👥  Customers" styleClass="nav-button"/>
                 <Button fx:id="employeesButton" maxWidth="Infinity" mnemonicParsing="false" onAction="#showEmployees" text="🧑  Employees" styleClass="nav-button"/>
                 <Button fx:id="servicesButton" maxWidth="Infinity" mnemonicParsing="false" onAction="#showServices" text="💆  Services" styleClass="nav-button"/>
+                <Button fx:id="schedulesButton" maxWidth="Infinity" mnemonicParsing="false" onAction="#showSchedules" text="🕘  Schedules" styleClass="nav-button"/>
                 <Button fx:id="appointmentsButton" maxWidth="Infinity" mnemonicParsing="false" onAction="#showAppointments" text="📅  Appointments" styleClass="nav-button"/>
                 <Button fx:id="invoicesButton" maxWidth="Infinity" mnemonicParsing="false" onAction="#showInvoices" text="💰  Invoices" styleClass="nav-button"/>
                 <Button fx:id="smsButton" maxWidth="Infinity" mnemonicParsing="false" onAction="#showSms" text="📩  SMS" styleClass="nav-button"/>
