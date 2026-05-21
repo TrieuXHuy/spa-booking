@@ -35,6 +35,7 @@ public class SecurityConfig {
                                 "/api/employees/**",
                                 "/api/employee-schedules/**",
                                 "/api/invoices/**",
+                                "/api/sms-reminders/**",
                                 "/api/services/**")
                         .hasRole("ADMIN")
                         .anyRequest().authenticated())
