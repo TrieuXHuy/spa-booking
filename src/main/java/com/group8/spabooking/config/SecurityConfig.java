@@ -33,6 +33,7 @@ public class SecurityConfig {
                                 "/api/users/**",
                                 "/api/customers/**",
                                 "/api/employees/**",
+                                "/api/employee-schedules/**",
                                 "/api/services/**")
                         .hasRole("ADMIN")
                         .anyRequest().authenticated())
