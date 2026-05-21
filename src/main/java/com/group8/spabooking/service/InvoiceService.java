@@ -39,6 +39,7 @@ public class InvoiceService {
     private final InvoiceRepository invoiceRepository;
     private final AppointmentServiceRepository appointmentServiceRepository;
     private final AppointmentManagerService appointmentManagerService;
+    private final CurrentUserService currentUserService;
 
     @Transactional(readOnly = true)
     public List<InvoiceResponse> findAll() {
@@ -65,6 +66,7 @@ public class InvoiceService {
         }
 
         Appointment appointment = appointmentManagerService.getAppointment(request.getAppointmentId());
+        validateAppointmentCanCreateInvoice(appointment);
         BigDecimal totalAmount = calculateTotalAmount(appointment.getId());
         BigDecimal discountAmount = discountOrZero(request.getDiscountAmount());
         validateDiscount(totalAmount, discountAmount);
@@ -86,10 +88,19 @@ public class InvoiceService {
     public InvoiceResponse pay(Long id, InvoicePaymentRequest request) {
         validatePaymentMethod(request.getPaymentMethod());
         Invoice invoice = getInvoice(id);
+        validateAppointmentCanPay(invoice.getAppointment());
         invoice.setPaymentMethod(request.getPaymentMethod());
         invoice.setPaymentStatus(PAID_STATUS);
         invoice.setPaidAt(LocalDateTime.now());
         return InvoiceResponse.from(invoice);
+    }
+
+    @Transactional
+    public InvoiceResponse pay(Long id, Long currentUserId, String paymentMethod) {
+        currentUserService.requireAnyRole(currentUserId, "ADMIN", "EMPLOYEE");
+        InvoicePaymentRequest request = new InvoicePaymentRequest();
+        request.setPaymentMethod(paymentMethod);
+        return pay(id, request);
     }
 
     @Transactional
@@ -100,6 +111,9 @@ public class InvoiceService {
         }
 
         Invoice invoice = getInvoice(id);
+        if (PAID_STATUS.equals(paymentStatus)) {
+            validateAppointmentCanPay(invoice.getAppointment());
+        }
         invoice.setPaymentStatus(paymentStatus);
         if (PAID_STATUS.equals(paymentStatus) && invoice.getPaidAt() == null) {
             invoice.setPaidAt(LocalDateTime.now());
@@ -108,6 +122,14 @@ public class InvoiceService {
             invoice.setPaidAt(null);
         }
         return InvoiceResponse.from(invoice);
+    }
+
+    @Transactional
+    public InvoiceResponse updateStatus(Long id, Long currentUserId, String paymentStatus) {
+        currentUserService.requireAnyRole(currentUserId, "ADMIN", "EMPLOYEE");
+        InvoiceStatusRequest request = new InvoiceStatusRequest();
+        request.setPaymentStatus(paymentStatus);
+        return updateStatus(id, request);
     }
 
     @Transactional
@@ -151,6 +173,21 @@ public class InvoiceService {
     private void validatePaymentMethod(String paymentMethod) {
         if (!VALID_PAYMENT_METHODS.contains(paymentMethod.trim())) {
             throw new BadRequestException("Phương thức thanh toán không hợp lệ");
+        }
+    }
+
+    private void validateAppointmentCanCreateInvoice(Appointment appointment) {
+        if ("Đã hủy".equals(appointment.getStatus())) {
+            throw new BadRequestException("Lịch hẹn đã hủy thì không được tạo hóa đơn");
+        }
+        if (!"Hoàn thành".equals(appointment.getStatus())) {
+            throw new BadRequestException("Chỉ lịch hẹn đã hoàn thành mới được tạo hóa đơn");
+        }
+    }
+
+    private void validateAppointmentCanPay(Appointment appointment) {
+        if ("Đã hủy".equals(appointment.getStatus())) {
+            throw new BadRequestException("Lịch hẹn đã hủy thì không được thanh toán");
         }
     }
 }

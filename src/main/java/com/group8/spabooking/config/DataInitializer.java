@@ -8,8 +8,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import com.group8.spabooking.service.PasswordService;
 
 @Component
 @RequiredArgsConstructor
@@ -17,7 +17,7 @@ public class DataInitializer implements CommandLineRunner {
 
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final PasswordService passwordService;
 
     @Override
     public void run(String... args) {
@@ -47,7 +47,7 @@ public class DataInitializer implements CommandLineRunner {
 
         User admin = User.builder()
                 .username("admin")
-                .password(passwordEncoder.encode("admin123"))
+                .password(passwordService.encode("admin123"))
                 .fullName("System Admin")
                 .role(adminRole)
                 .active(true)

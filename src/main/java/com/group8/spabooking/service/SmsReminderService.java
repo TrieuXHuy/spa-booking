@@ -27,6 +27,7 @@ public class SmsReminderService {
 
     private final SmsReminderRepository smsReminderRepository;
     private final AppointmentManagerService appointmentManagerService;
+    private final CurrentUserService currentUserService;
 
     @Transactional(readOnly = true)
     public List<SmsReminderResponse> findAll(Long appointmentId, String status) {
@@ -43,6 +44,7 @@ public class SmsReminderService {
     @Transactional
     public SmsReminderResponse create(SmsReminderRequest request) {
         Appointment appointment = appointmentManagerService.getAppointment(request.getAppointmentId());
+        validateAppointmentConfirmed(appointment);
         SmsReminder smsReminder = SmsReminder.builder()
                 .appointment(appointment)
                 .phone(resolvePhone(request.getPhone(), appointment))
@@ -52,6 +54,12 @@ public class SmsReminderService {
                 .build();
 
         return SmsReminderResponse.from(smsReminderRepository.save(smsReminder));
+    }
+
+    @Transactional
+    public SmsReminderResponse create(Long currentUserId, SmsReminderRequest request) {
+        currentUserService.requireAnyRole(currentUserId, "ADMIN", "EMPLOYEE");
+        return create(request);
     }
 
     @Transactional
@@ -120,5 +128,11 @@ public class SmsReminderService {
             return phone.trim();
         }
         return appointment.getCustomer().getPhone();
+    }
+
+    private void validateAppointmentConfirmed(Appointment appointment) {
+        if (!"Đã xác nhận".equals(appointment.getStatus())) {
+            throw new BadRequestException("Chỉ lịch hẹn đã xác nhận mới được tạo SMS nhắc lịch");
+        }
     }
 }

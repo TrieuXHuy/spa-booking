@@ -11,7 +11,6 @@ import com.group8.spabooking.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +20,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final RoleService roleService;
-    private final PasswordEncoder passwordEncoder;
+    private final PasswordService passwordService;
 
     @Transactional(readOnly = true)
     public List<UserResponse> findAll() {
@@ -46,7 +45,7 @@ public class UserService {
         LocalDateTime now = LocalDateTime.now();
         User user = User.builder()
                 .username(username)
-                .password(passwordEncoder.encode(request.getPassword()))
+                .password(passwordService.encode(request.getPassword()))
                 .fullName(request.getFullName())
                 .email(request.getEmail())
                 .phone(request.getPhone())

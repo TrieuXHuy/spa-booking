@@ -12,6 +12,7 @@ import com.group8.spabooking.exception.BadRequestException;
 import com.group8.spabooking.exception.ResourceNotFoundException;
 import com.group8.spabooking.repository.AppointmentRepository;
 import com.group8.spabooking.repository.AppointmentServiceRepository;
+import com.group8.spabooking.repository.EmployeeScheduleRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -38,6 +39,8 @@ public class AppointmentManagerService {
     private final CustomerService customerService;
     private final EmployeeService employeeService;
     private final SpaService spaService;
+    private final EmployeeScheduleRepository employeeScheduleRepository;
+    private final CurrentUserService currentUserService;
 
     @Transactional(readOnly = true)
     public List<AppointmentResponse> findAll(Long customerId, Long employeeId, LocalDate appointmentDate) {
@@ -71,6 +74,7 @@ public class AppointmentManagerService {
                 .updatedAt(now)
                 .build();
 
+        validateEmployeeAvailability(null, employee, request.getAppointmentDate(), appointment.getStartTime(), appointment.getEndTime());
         Appointment savedAppointment = appointmentRepository.save(appointment);
         saveAppointmentServices(savedAppointment, selectedServices);
         return toResponse(savedAppointment);
@@ -90,6 +94,12 @@ public class AppointmentManagerService {
         appointment.setNote(request.getNote());
         appointment.setUpdatedAt(LocalDateTime.now());
 
+        validateEmployeeAvailability(
+                appointment.getId(),
+                appointment.getEmployee(),
+                appointment.getAppointmentDate(),
+                appointment.getStartTime(),
+                appointment.getEndTime());
         appointmentServiceRepository.deleteByAppointmentId(appointment.getId());
         saveAppointmentServices(appointment, selectedServices);
         return toResponse(appointment);
@@ -98,9 +108,24 @@ public class AppointmentManagerService {
     @Transactional
     public AppointmentResponse assignEmployee(Long id, AppointmentAssignEmployeeRequest request) {
         Appointment appointment = getAppointment(id);
-        appointment.setEmployee(employeeService.getEmployee(request.getEmployeeId()));
+        Employee employee = employeeService.getEmployee(request.getEmployeeId());
+        validateEmployeeAvailability(
+                appointment.getId(),
+                employee,
+                appointment.getAppointmentDate(),
+                appointment.getStartTime(),
+                appointment.getEndTime());
+        appointment.setEmployee(employee);
         appointment.setUpdatedAt(LocalDateTime.now());
         return toResponse(appointment);
+    }
+
+    @Transactional
+    public AppointmentResponse assignEmployee(Long id, Long currentUserId, Long employeeId) {
+        currentUserService.requireAnyRole(currentUserId, "ADMIN", "EMPLOYEE");
+        AppointmentAssignEmployeeRequest request = new AppointmentAssignEmployeeRequest();
+        request.setEmployeeId(employeeId);
+        return assignEmployee(id, request);
     }
 
     @Transactional
@@ -111,9 +136,21 @@ public class AppointmentManagerService {
         }
 
         Appointment appointment = getAppointment(id);
+        validateStatusTransition(appointment.getStatus(), status);
         appointment.setStatus(status);
         appointment.setUpdatedAt(LocalDateTime.now());
         return toResponse(appointment);
+    }
+
+    @Transactional
+    public AppointmentResponse updateStatus(Long id, Long currentUserId, String status) {
+        String normalizedStatus = status.trim();
+        if ("Đã xác nhận".equals(normalizedStatus)) {
+            currentUserService.requireAnyRole(currentUserId, "ADMIN", "EMPLOYEE");
+        }
+        AppointmentStatusRequest request = new AppointmentStatusRequest();
+        request.setStatus(normalizedStatus);
+        return updateStatus(id, request);
     }
 
     @Transactional
@@ -182,5 +219,54 @@ public class AppointmentManagerService {
                         .build())
                 .toList();
         appointmentServiceRepository.saveAll(appointmentServices);
+    }
+
+    private void validateEmployeeAvailability(
+            Long currentAppointmentId,
+            Employee employee,
+            LocalDate appointmentDate,
+            java.time.LocalTime startTime,
+            java.time.LocalTime endTime) {
+        if (employee == null) {
+            return;
+        }
+
+        boolean hasWorkingSchedule = employeeScheduleRepository
+                .findByEmployeeIdAndWorkDate(employee.getId(), appointmentDate)
+                .stream()
+                .anyMatch(schedule ->
+                        !schedule.getStartTime().isAfter(startTime)
+                                && !schedule.getEndTime().isBefore(endTime));
+        if (!hasWorkingSchedule) {
+            throw new BadRequestException("Nhân viên không có ca làm phù hợp với thời gian lịch hẹn");
+        }
+
+        boolean hasOverlappingAppointment = appointmentRepository
+                .findByEmployeeIdAndAppointmentDate(employee.getId(), appointmentDate)
+                .stream()
+                .filter(existing -> currentAppointmentId == null || !existing.getId().equals(currentAppointmentId))
+                .filter(existing -> !"Đã hủy".equals(existing.getStatus()))
+                .filter(existing -> !"Khách không đến".equals(existing.getStatus()))
+                .anyMatch(existing -> startTime.isBefore(existing.getEndTime()) && endTime.isAfter(existing.getStartTime()));
+        if (hasOverlappingAppointment) {
+            throw new BadRequestException("Nhân viên đã có lịch hẹn bị trùng thời gian");
+        }
+    }
+
+    private void validateStatusTransition(String currentStatus, String nextStatus) {
+        if (currentStatus.equals(nextStatus)) {
+            return;
+        }
+        boolean validTransition = switch (currentStatus) {
+            case "Chờ xác nhận" -> Set.of("Đã xác nhận", "Đã hủy").contains(nextStatus);
+            case "Đã xác nhận" -> Set.of("Đang thực hiện", "Đã hủy", "Khách không đến").contains(nextStatus);
+            case "Đang thực hiện" -> Set.of("Hoàn thành", "Đã hủy").contains(nextStatus);
+            case "Hoàn thành", "Đã hủy", "Khách không đến" -> false;
+            default -> false;
+        };
+        if (!validTransition) {
+            throw new BadRequestException("Không thể chuyển trạng thái lịch hẹn từ "
+                    + currentStatus + " sang " + nextStatus);
+        }
     }
 }
