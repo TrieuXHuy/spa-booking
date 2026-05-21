@@ -1,0 +1,297 @@
+Dưới đây là **thiết kế nghiệp vụ** cho đề tài: **Xây dựng hệ thống quản lý đặt lịch và thanh toán dịch vụ Spa/Salon**.
+
+## 1. Mục tiêu hệ thống
+
+Hệ thống giúp spa/salon quản lý:
+
+* Khách hàng
+* Dịch vụ
+* Nhân viên
+* Đặt lịch
+* Thanh toán
+* Tài khoản đăng nhập
+* Phân quyền người dùng
+* Nhắc lịch qua SMS
+
+---
+
+## 2. Các vai trò trong hệ thống
+
+### 1. Admin / Chủ cửa hàng
+
+Có toàn quyền:
+
+* Quản lý tài khoản
+* Quản lý nhân viên
+* Quản lý khách hàng
+* Quản lý dịch vụ
+* Xem tất cả lịch hẹn
+* Xem doanh thu
+* Quản lý thanh toán
+
+### 2. Nhân viên
+
+Có quyền:
+
+* Xem lịch được phân công
+* Cập nhật trạng thái lịch hẹn
+* Xem thông tin khách hàng cơ bản
+* Xác nhận khách đã đến / hoàn thành dịch vụ
+
+### 3. Khách hàng
+
+Có quyền:
+
+* Đăng ký / đăng nhập
+* Xem danh sách dịch vụ
+* Đặt lịch
+* Xem lịch hẹn của mình
+* Hủy lịch nếu chưa đến giờ
+* Xem lịch sử thanh toán
+
+---
+
+## 3. Luồng nghiệp vụ chính
+
+## A. Đăng nhập và phân quyền
+
+### Mô tả
+
+Người dùng đăng nhập bằng email/số điện thoại và mật khẩu.
+
+### Luồng xử lý
+
+1. Người dùng nhập tài khoản và mật khẩu.
+2. Hệ thống kiểm tra thông tin đăng nhập.
+3. Nếu đúng, hệ thống xác định vai trò:
+
+   * Admin
+   * Nhân viên
+   * Khách hàng
+4. Điều hướng người dùng vào màn hình phù hợp.
+5. Nếu sai, báo lỗi đăng nhập.
+
+---
+
+## B. Quản lý khách hàng
+
+### Mô tả
+
+Lưu thông tin khách hàng để phục vụ đặt lịch và chăm sóc.
+
+### Chức năng
+
+* Thêm khách hàng
+* Sửa thông tin khách hàng
+* Xem danh sách khách hàng
+* Tìm kiếm khách hàng theo tên, số điện thoại
+* Xem lịch sử đặt lịch của khách
+
+### Thông tin cần có
+
+* Họ tên
+* Số điện thoại
+* Email
+* Giới tính
+* Ngày sinh
+* Ghi chú
+
+---
+
+## C. Quản lý dịch vụ
+
+### Mô tả
+
+Admin quản lý các dịch vụ spa/salon cung cấp.
+
+### Chức năng
+
+* Thêm dịch vụ
+* Sửa dịch vụ
+* Xóa / ngừng kinh doanh dịch vụ
+* Xem danh sách dịch vụ
+
+### Thông tin dịch vụ
+
+* Tên dịch vụ
+* Mô tả
+* Giá tiền
+* Thời lượng thực hiện
+* Trạng thái hoạt động
+
+Ví dụ:
+
+* Cắt tóc nam
+* Gội đầu dưỡng sinh
+* Massage body
+* Chăm sóc da mặt
+* Làm nail
+
+---
+
+## D. Đặt lịch dịch vụ
+
+### Mô tả
+
+Khách hàng hoặc nhân viên tạo lịch hẹn sử dụng dịch vụ.
+
+### Luồng xử lý
+
+1. Khách hàng chọn dịch vụ.
+2. Chọn ngày, giờ.
+3. Chọn nhân viên nếu cần.
+4. Hệ thống kiểm tra thời gian có bị trùng không.
+5. Nếu hợp lệ, tạo lịch hẹn.
+6. Lịch hẹn có trạng thái ban đầu là **Chờ xác nhận**.
+7. Nhân viên/Admin xác nhận lịch.
+
+### Trạng thái lịch hẹn
+
+* Chờ xác nhận
+* Đã xác nhận
+* Đang thực hiện
+* Hoàn thành
+* Đã hủy
+* Khách không đến
+
+---
+
+## E. Quản lý lịch làm việc nhân viên
+
+### Mô tả
+
+Giúp hệ thống biết nhân viên nào rảnh để nhận lịch.
+
+### Chức năng
+
+* Admin tạo lịch làm việc cho nhân viên
+* Nhân viên xem lịch làm việc
+* Kiểm tra trùng lịch khi đặt lịch
+* Phân công nhân viên cho lịch hẹn
+
+---
+
+## F. Thanh toán
+
+### Mô tả
+
+Sau khi khách sử dụng dịch vụ, hệ thống tạo hóa đơn thanh toán.
+
+### Luồng xử lý
+
+1. Lịch hẹn chuyển sang trạng thái **Hoàn thành**.
+2. Hệ thống tạo hóa đơn.
+3. Nhân viên/Admin nhập hình thức thanh toán.
+4. Cập nhật trạng thái thanh toán.
+
+### Hình thức thanh toán
+
+* Tiền mặt
+* Chuyển khoản
+* Thẻ ngân hàng
+* Ví điện tử
+
+### Trạng thái thanh toán
+
+* Chưa thanh toán
+* Đã thanh toán
+* Đã hủy
+* Hoàn tiền
+
+---
+
+## G. Nhắc lịch SMS
+
+### Mô tả
+
+Hệ thống gửi tin nhắn nhắc lịch cho khách hàng.
+
+### Luồng xử lý
+
+1. Trước giờ hẹn, hệ thống kiểm tra các lịch sắp tới.
+2. Nếu lịch đã xác nhận, gửi SMS cho khách.
+3. Nội dung SMS gồm:
+
+   * Tên khách hàng
+   * Tên dịch vụ
+   * Thời gian hẹn
+   * Địa chỉ spa/salon
+4. Lưu lại trạng thái gửi SMS.
+
+### Ví dụ SMS
+
+> Spa ABC nhắc bạn có lịch hẹn dịch vụ Chăm sóc da lúc 14:00 ngày 22/05/2026. Vui lòng đến đúng giờ.
+
+---
+
+## 4. Các màn hình chính
+
+### Admin
+
+* Dashboard
+* Quản lý khách hàng
+* Quản lý nhân viên
+* Quản lý dịch vụ
+* Quản lý lịch hẹn
+* Quản lý thanh toán
+* Quản lý tài khoản
+* Báo cáo doanh thu
+
+### Nhân viên
+
+* Lịch làm việc
+* Lịch hẹn được phân công
+* Chi tiết khách hàng
+* Cập nhật trạng thái lịch hẹn
+
+### Khách hàng
+
+* Đăng nhập / đăng ký
+* Danh sách dịch vụ
+* Đặt lịch
+* Lịch hẹn của tôi
+* Lịch sử thanh toán
+
+---
+
+## 5. Quy tắc nghiệp vụ quan trọng
+
+1. Một khách hàng có thể đặt nhiều lịch hẹn.
+2. Một lịch hẹn có thể gồm một hoặc nhiều dịch vụ.
+3. Một nhân viên không được nhận hai lịch trùng thời gian.
+4. Chỉ Admin được quản lý dịch vụ, nhân viên và tài khoản.
+5. Nhân viên chỉ xem được lịch được phân công.
+6. Khách hàng chỉ xem được lịch của chính mình.
+7. Chỉ lịch đã hoàn thành mới được thanh toán.
+8. Lịch đã hủy thì không được thanh toán.
+9. SMS chỉ gửi cho lịch đã xác nhận.
+10. Mật khẩu người dùng phải được mã hóa khi lưu vào database.
+
+---
+
+## 6. Phạm vi vừa đủ cho đồ án
+
+Với đề tài này, bạn chỉ cần làm các chức năng chính:
+
+* Đăng nhập
+* Phân quyền
+* Quản lý khách hàng
+* Quản lý nhân viên
+* Quản lý dịch vụ
+* Đặt lịch
+* Cập nhật trạng thái lịch hẹn
+* Thanh toán
+* Nhắc lịch SMS dạng mô phỏng
+
+SMS không cần tích hợp thật, có thể lưu trạng thái là:
+
+* Chưa gửi
+* Đã gửi
+* Gửi lỗi
+
+---
+
+Nói ngắn gọn, nghiệp vụ chính là:
+
+**Khách hàng chọn dịch vụ → đặt lịch → nhân viên xác nhận → thực hiện dịch vụ → thanh toán → hệ thống nhắc lịch bằng SMS.**
+

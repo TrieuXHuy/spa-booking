@@ -1,0 +1,452 @@
+Dưới đây là database cho hệ thống **quản lý đặt lịch và thanh toán dịch vụ Spa/Salon**, có **login + phân quyền**, và các cột text đều dùng `NVARCHAR` để lưu tiếng Việt. Thiết kế bám theo nghiệp vụ bạn đưa: khách chọn dịch vụ → đặt lịch → nhân viên xác nhận/thực hiện → thanh toán → nhắc lịch SMS. 
+
+## 1. Sơ đồ bảng chính
+
+```sql
+CREATE DATABASE spa_booking_system;
+GO
+
+USE spa_booking_system;
+GO
+```
+
+---
+
+## 2. Bảng vai trò
+
+```sql
+CREATE TABLE roles (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    name NVARCHAR(50) NOT NULL UNIQUE,
+    description NVARCHAR(255)
+);
+```
+
+Dữ liệu mẫu:
+
+```sql
+INSERT INTO roles (name, description)
+VALUES
+(N'ADMIN', N'Quản trị hệ thống / chủ cửa hàng'),
+(N'EMPLOYEE', N'Nhân viên spa/salon'),
+(N'CUSTOMER', N'Khách hàng');
+```
+
+### Vì sao cần bảng này?
+
+Dùng để phân quyền.
+Ví dụ:
+
+* Admin quản lý toàn bộ
+* Nhân viên chỉ xem lịch được phân công
+* Khách hàng chỉ xem lịch của mình
+
+---
+
+## 3. Bảng tài khoản đăng nhập
+
+```sql
+CREATE TABLE users (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    username NVARCHAR(100) NOT NULL UNIQUE,
+    password NVARCHAR(255) NOT NULL,
+    full_name NVARCHAR(150) NOT NULL,
+    email NVARCHAR(150),
+    phone NVARCHAR(20),
+    role_id BIGINT NOT NULL,
+    is_active BIT DEFAULT 1,
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME,
+
+    CONSTRAINT fk_users_roles
+        FOREIGN KEY (role_id) REFERENCES roles(id)
+);
+```
+
+### Vì sao thiết kế như vậy?
+
+Bảng này dùng cho **đăng nhập**.
+`password` lưu mật khẩu đã mã hóa, không lưu mật khẩu thật.
+
+`role_id` giúp biết tài khoản này là Admin, Nhân viên hay Khách hàng.
+
+---
+
+## 4. Bảng khách hàng
+
+```sql
+CREATE TABLE customers (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    user_id BIGINT NULL,
+    full_name NVARCHAR(150) NOT NULL,
+    phone NVARCHAR(20) NOT NULL,
+    email NVARCHAR(150),
+    gender NVARCHAR(20),
+    date_of_birth DATE,
+    note NVARCHAR(500),
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME,
+
+    CONSTRAINT fk_customers_users
+        FOREIGN KEY (user_id) REFERENCES users(id)
+);
+```
+
+### Vì sao tách `customers` khỏi `users`?
+
+Vì không phải khách nào cũng có tài khoản đăng nhập.
+
+Ví dụ:
+
+* Khách đặt trực tiếp tại quầy → chỉ cần lưu thông tin khách
+* Khách đăng ký online → có thêm tài khoản trong bảng `users`
+
+---
+
+## 5. Bảng nhân viên
+
+```sql
+CREATE TABLE employees (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    full_name NVARCHAR(150) NOT NULL,
+    phone NVARCHAR(20),
+    email NVARCHAR(150),
+    position NVARCHAR(100),
+    skill_note NVARCHAR(500),
+    is_active BIT DEFAULT 1,
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME,
+
+    CONSTRAINT fk_employees_users
+        FOREIGN KEY (user_id) REFERENCES users(id)
+);
+```
+
+### Vì sao cần bảng nhân viên riêng?
+
+Vì nhân viên ngoài thông tin đăng nhập còn có thông tin nghiệp vụ:
+
+* Chức vụ
+* Kỹ năng
+* Trạng thái còn làm hay đã nghỉ
+
+---
+
+## 6. Bảng dịch vụ
+
+```sql
+CREATE TABLE services (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    name NVARCHAR(150) NOT NULL,
+    description NVARCHAR(1000),
+    price DECIMAL(18,2) NOT NULL,
+    duration_minutes INT NOT NULL,
+    is_active BIT DEFAULT 1,
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME
+);
+```
+
+### Vì sao cần `duration_minutes`?
+
+Để hệ thống tính thời gian kết thúc lịch hẹn.
+
+Ví dụ:
+
+* Massage body: 60 phút
+* Gội đầu dưỡng sinh: 45 phút
+
+Từ đó kiểm tra được nhân viên có bị trùng lịch không.
+
+---
+
+## 7. Bảng lịch làm việc nhân viên
+
+```sql
+CREATE TABLE employee_schedules (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    employee_id BIGINT NOT NULL,
+    work_date DATE NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    note NVARCHAR(500),
+
+    CONSTRAINT fk_employee_schedules_employees
+        FOREIGN KEY (employee_id) REFERENCES employees(id)
+);
+```
+
+### Vì sao cần bảng này?
+
+Để biết nhân viên nào đi làm ngày nào, giờ nào.
+Khi khách đặt lịch, hệ thống có thể kiểm tra nhân viên có rảnh không.
+
+---
+
+## 8. Bảng lịch hẹn
+
+```sql
+CREATE TABLE appointments (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    customer_id BIGINT NOT NULL,
+    employee_id BIGINT NULL,
+    appointment_date DATE NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    status NVARCHAR(50) NOT NULL DEFAULT N'Chờ xác nhận',
+    note NVARCHAR(500),
+    created_at DATETIME DEFAULT GETDATE(),
+    updated_at DATETIME,
+
+    CONSTRAINT fk_appointments_customers
+        FOREIGN KEY (customer_id) REFERENCES customers(id),
+
+    CONSTRAINT fk_appointments_employees
+        FOREIGN KEY (employee_id) REFERENCES employees(id)
+);
+```
+
+### Trạng thái lịch hẹn nên dùng
+
+```text
+Chờ xác nhận
+Đã xác nhận
+Đang thực hiện
+Hoàn thành
+Đã hủy
+Khách không đến
+```
+
+### Vì sao `employee_id` cho phép NULL?
+
+Vì có thể khách đặt lịch trước nhưng chưa phân công nhân viên.
+Sau đó Admin hoặc nhân viên lễ tân sẽ phân công sau.
+
+---
+
+## 9. Bảng chi tiết dịch vụ trong lịch hẹn
+
+```sql
+CREATE TABLE appointment_services (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    appointment_id BIGINT NOT NULL,
+    service_id BIGINT NOT NULL,
+    price DECIMAL(18,2) NOT NULL,
+    duration_minutes INT NOT NULL,
+
+    CONSTRAINT fk_appointment_services_appointments
+        FOREIGN KEY (appointment_id) REFERENCES appointments(id),
+
+    CONSTRAINT fk_appointment_services_services
+        FOREIGN KEY (service_id) REFERENCES services(id)
+);
+```
+
+### Vì sao cần bảng này?
+
+Vì **một lịch hẹn có thể gồm nhiều dịch vụ**.
+
+Ví dụ một khách đặt:
+
+* Gội đầu dưỡng sinh
+* Chăm sóc da mặt
+* Massage vai gáy
+
+Nếu để `service_id` trực tiếp trong bảng `appointments` thì chỉ lưu được một dịch vụ, không đủ.
+
+---
+
+## 10. Bảng hóa đơn thanh toán
+
+```sql
+CREATE TABLE invoices (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    appointment_id BIGINT NOT NULL UNIQUE,
+    total_amount DECIMAL(18,2) NOT NULL,
+    discount_amount DECIMAL(18,2) DEFAULT 0,
+    final_amount AS (total_amount - discount_amount),
+    payment_method NVARCHAR(50),
+    payment_status NVARCHAR(50) NOT NULL DEFAULT N'Chưa thanh toán',
+    paid_at DATETIME NULL,
+    created_at DATETIME DEFAULT GETDATE(),
+
+    CONSTRAINT fk_invoices_appointments
+        FOREIGN KEY (appointment_id) REFERENCES appointments(id)
+);
+```
+
+### Trạng thái thanh toán
+
+```text
+Chưa thanh toán
+Đã thanh toán
+Đã hủy
+Hoàn tiền
+```
+
+### Phương thức thanh toán
+
+```text
+Tiền mặt
+Chuyển khoản
+Thẻ ngân hàng
+Ví điện tử
+```
+
+### Vì sao `appointment_id` là UNIQUE?
+
+Vì một lịch hẹn chỉ nên có một hóa đơn chính.
+
+---
+
+## 11. Bảng nhắc lịch SMS
+
+```sql
+CREATE TABLE sms_reminders (
+    id BIGINT IDENTITY(1,1) PRIMARY KEY,
+    appointment_id BIGINT NOT NULL,
+    phone NVARCHAR(20) NOT NULL,
+    message NVARCHAR(1000) NOT NULL,
+    status NVARCHAR(50) NOT NULL DEFAULT N'Chưa gửi',
+    sent_at DATETIME NULL,
+    error_message NVARCHAR(500),
+    created_at DATETIME DEFAULT GETDATE(),
+
+    CONSTRAINT fk_sms_reminders_appointments
+        FOREIGN KEY (appointment_id) REFERENCES appointments(id)
+);
+```
+
+### Trạng thái SMS
+
+```text
+Chưa gửi
+Đã gửi
+Gửi lỗi
+```
+
+### Vì sao cần bảng này?
+
+Để mô phỏng chức năng nhắc lịch SMS.
+Dù không tích hợp SMS thật, hệ thống vẫn lưu được nội dung tin nhắn và trạng thái gửi.
+
+---
+
+# 12. Tổng quan quan hệ giữa các bảng
+
+```text
+roles 1 - n users
+
+users 1 - 1 customers
+users 1 - 1 employees
+
+customers 1 - n appointments
+employees 1 - n appointments
+
+appointments 1 - n appointment_services
+services 1 - n appointment_services
+
+appointments 1 - 1 invoices
+appointments 1 - n sms_reminders
+
+employees 1 - n employee_schedules
+```
+
+---
+
+# 13. Vì sao thiết kế database như vậy?
+
+Thiết kế này tách rõ từng phần nghiệp vụ:
+
+## `users`, `roles`
+
+Phục vụ đăng nhập và phân quyền.
+
+Không trộn tài khoản với khách hàng/nhân viên, vì tài khoản chỉ phục vụ xác thực.
+
+---
+
+## `customers`
+
+Lưu thông tin khách sử dụng dịch vụ.
+
+Khách có thể có tài khoản hoặc không có tài khoản.
+
+---
+
+## `employees`
+
+Lưu thông tin nhân viên làm dịch vụ.
+
+Nhân viên có tài khoản đăng nhập để xem lịch được phân công.
+
+---
+
+## `services`
+
+Lưu danh sách dịch vụ Spa/Salon.
+
+Có `price` và `duration_minutes` để phục vụ đặt lịch và tính tiền.
+
+---
+
+## `appointments`
+
+Lưu lịch hẹn chính.
+
+Chứa khách hàng, nhân viên, ngày giờ, trạng thái lịch.
+
+---
+
+## `appointment_services`
+
+Dùng để xử lý trường hợp một lịch hẹn có nhiều dịch vụ.
+
+Đây là bảng trung gian giữa `appointments` và `services`.
+
+---
+
+## `employee_schedules`
+
+Dùng để quản lý lịch làm việc của nhân viên.
+
+Giúp kiểm tra nhân viên có đi làm và có rảnh không.
+
+---
+
+## `invoices`
+
+Lưu thông tin thanh toán.
+
+Chỉ tạo hóa đơn khi lịch đã hoàn thành.
+
+---
+
+## `sms_reminders`
+
+Lưu lịch sử nhắc lịch.
+
+Phù hợp với đồ án vì có thể mô phỏng SMS mà không cần tích hợp thật.
+
+---
+
+# 14. Bộ bảng này là vừa đủ cho đồ án
+
+Bạn có thể làm các chức năng chính:
+
+```text
+Đăng nhập
+Phân quyền
+Quản lý khách hàng
+Quản lý nhân viên
+Quản lý dịch vụ
+Quản lý lịch làm việc
+Đặt lịch
+Cập nhật trạng thái lịch hẹn
+Thanh toán
+Mô phỏng nhắc lịch SMS
+```
+
+Thiết kế này đủ dùng cho Java Spring Boot + SQL Server.
+
