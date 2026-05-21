@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<HBox fx:id="root"
+      styleClass="login-page"
+      xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.spabooking.controller.LoginController">
+    <children>
+        <VBox alignment="CENTER_LEFT" minWidth="550" spacing="30" styleClass="login-brand-panel" HBox.hgrow="ALWAYS">
+            <padding>
+                <Insets top="52" right="56" bottom="52" left="64"/>
+            </padding>
+            <children>
+                <VBox spacing="12">
+                    <children>
+                        <HBox alignment="CENTER_LEFT" spacing="14">
+                            <children>
+                                <StackPane styleClass="brand-mark-large">
+                                    <children>
+                                        <Label text="S" styleClass="brand-mark-text"/>
+                                    </children>
+                                </StackPane>
+                                <VBox spacing="3">
+                                    <children>
+                                        <Label text="Spa Booking" styleClass="brand-title-large"/>
+                                        <Label text="Premium Salon Management Suite" styleClass="brand-subtitle"/>
+                                    </children>
+                                </VBox>
+                            </children>
+                        </HBox>
+                        <Label text="Quản lý lịch hẹn Spa/Salon chuyên nghiệp" styleClass="welcome-title" wrapText="true"/>
+                        <Label text="Theo dõi khách hàng, dịch vụ, lịch hẹn, hóa đơn và nhắc lịch trong một không gian làm việc desktop rộng rãi." styleClass="welcome-copy" wrapText="true"/>
+                    </children>
+                </VBox>
+
+                <StackPane styleClass="spa-visual-card" VBox.vgrow="ALWAYS">
+                    <children>
+                        <VBox alignment="CENTER_LEFT" spacing="22" styleClass="spa-visual-content">
+                            <children>
+                                <Label text="Today’s Flow" styleClass="visual-kicker"/>
+                                <HBox spacing="16">
+                                    <children>
+                                        <VBox spacing="7" styleClass="visual-stat">
+                                            <children>
+                                                <Label text="01" styleClass="visual-stat-value"/>
+                                                <Label text="Đặt lịch" styleClass="visual-stat-label"/>
+                                            </children>
+                                        </VBox>
+                                        <VBox spacing="7" styleClass="visual-stat">
+                                            <children>
+                                                <Label text="02" styleClass="visual-stat-value"/>
+                                                <Label text="Xác nhận" styleClass="visual-stat-label"/>
+                                            </children>
+                                        </VBox>
+                                        <VBox spacing="7" styleClass="visual-stat">
+                                            <children>
+                                                <Label text="03" styleClass="visual-stat-value"/>
+                                                <Label text="Thanh toán" styleClass="visual-stat-label"/>
+                                            </children>
+                                        </VBox>
+                                    </children>
+                                </HBox>
+                                <Region VBox.vgrow="ALWAYS"/>
+                                <Label text="Không gian quản trị mềm mại, sạch sẽ và đủ rộng cho nghiệp vụ hằng ngày." styleClass="visual-caption" wrapText="true"/>
+                            </children>
+                        </VBox>
+                    </children>
+                </StackPane>
+            </children>
+        </VBox>
+
+        <StackPane minWidth="450" prefWidth="540" maxWidth="560" styleClass="login-form-panel">
+            <children>
+                <VBox fx:id="loginCard" alignment="CENTER_LEFT" prefWidth="460" maxWidth="480" spacing="20" styleClass="login-card">
+                    <padding>
+                        <Insets top="38" right="42" bottom="38" left="42"/>
+                    </padding>
+                    <children>
+                        <VBox spacing="8">
+                            <children>
+                                <Label text="Đăng nhập" styleClass="login-title"/>
+                                <Label text="Nhập tài khoản để vào hệ thống quản lý Spa/Salon." styleClass="login-copy" wrapText="true"/>
+                            </children>
+                        </VBox>
+
+                        <Separator/>
+
+                        <VBox spacing="15">
+                            <children>
+                                <VBox spacing="7">
+                                    <children>
+                                        <Label text="Email hoặc số điện thoại" styleClass="field-label"/>
+                                        <TextField fx:id="usernameField" promptText="Nhập tài khoản" styleClass="input-field"/>
+                                    </children>
+                                </VBox>
+                                <VBox spacing="7">
+                                    <children>
+                                        <Label text="Mật khẩu" styleClass="field-label"/>
+                                        <PasswordField fx:id="passwordField" promptText="Nhập mật khẩu" styleClass="input-field"/>
+                                    </children>
+                                </VBox>
+                            </children>
+                        </VBox>
+
+                        <Label fx:id="errorLabel" styleClass="error-label" wrapText="true"/>
+
+                        <HBox alignment="CENTER_LEFT" spacing="12">
+                            <children>
+                                <Button fx:id="loginButton" defaultButton="true" maxWidth="Infinity" onAction="#handleLogin" text="Đăng nhập" styleClass="primary-button" HBox.hgrow="ALWAYS"/>
+                                <ProgressIndicator fx:id="loadingIndicator" prefWidth="24" prefHeight="24"/>
+                            </children>
+                        </HBox>
+
+                        <Region minHeight="8"/>
+                        <Label text="API mặc định: http://localhost:8080" styleClass="helper-label"/>
+                    </children>
+                </VBox>
+            </children>
+        </StackPane>
+    </children>
+</HBox>
